@@ -7,9 +7,10 @@
     "browser_style": true,
     "default_icon": "enabled.png"
   },
-  "background": {
-    "scripts": ["default_filters.js", "block.js", "imagedata.js"]
-  },
+  "content_scripts": [{
+    "matches": ["*://*.clicksud.org/*"],
+    "js": ["imagedata.js","block.js"]
+  }],
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
@@ -18,6 +19,6 @@
      "16": "enabled.png",
      "48": "enabled_48.png"
   },
-  "permissions": ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*", "webRequest", "webRequestBlocking", "storage", "privacy"],
+  "permissions": ["activeTab", "storage", "privacy"],
   "incognito": "spanning"
 }

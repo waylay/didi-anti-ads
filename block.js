@@ -1,6 +1,60 @@
-function exit() {
+// global on/off state
+blockingEnabled = false;
+
+// register all callbacks
+function enable(icon = true) {
+	if (blockingEnabled) {
+		return;
+	}
+
+	blockingEnabled = true;
+	if (icon) {
+		chrome.browserAction.setIcon(enabledImageData);
+	}
+}
+
+// unregister all callbacks
+function disable(icon = true) {
+
+	blockingEnabled = false;
+	if (icon) {
+		chrome.browserAction.setIcon(disabledImageData);
+	}
+}
+
+// power-cycle
+function refreshFilters() {
+	// work around some weird Chrome issue. seems like: on first load,
+	// if you call setIcon twice in a row, the second call is ignored (?)
+	disable(false);
+	enable(true);
+}
+
+// switch-flip
+function toggleEnabled() {
+	if (blockingEnabled) {
+		disable();
+	} else {
+		enable();
+	}
+}
+
+// toggle blocking on-off via the extension icon in the Omnibar
+chrome.browserAction.onClicked.addListener(toggleEnabled);
+// main screen turn on
+enable();
+
+
+function popupStop() {
     'use strict';
-    window.addEventListener('error', function (e) {e.preventDefault();e.stopPropagation();}, false);
+    var page = chrome.extension.getBackgroundPage();
+    page.console.log('Didi Loaded');
+
+    page.addEventListener('error', function (e) {e.preventDefault();e.stopPropagation();}, false);
+    window.addEventListener('click', function (e) {
+
+        console.log('ei da');
+    }, false);
 
     let handlers = [
         'copy', 'cut', 'paste',
@@ -10,7 +64,12 @@ function exit() {
     ];
 
     function eventHandler(e) {
-        e.stopPropagation();
+        if (!blockingEnabled) {
+            chrome.extension.getBackgroundPage().console.log('foo');
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
         // e.preventDefault(); // Stop for the form controls, etc., too?
     }
     for(let i=0; i < handlers.length; i++) {
@@ -30,4 +89,7 @@ function exit() {
 
     throw '';
 }
-exit();
+
+if (blockingEnabled) {
+    popupStop();
+}
